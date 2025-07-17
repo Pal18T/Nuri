@@ -1,10 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChefHat, Search, User, Menu, Heart, Bell } from "lucide-react";
+import { ChefHat, Search, User, Menu, Heart, Bell, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const navItems = [
     { label: "Discover", href: "#" },
@@ -58,13 +63,48 @@ const Header = () => {
               <Bell className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
             </Button>
-            <Button variant="outline" className="hidden sm:flex">
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
-            <Button variant="hero" className="hidden sm:flex">
-              Get Started
-            </Button>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" alt={user.email || ""} />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuItem className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.email}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        Signed in
+                      </p>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button variant="outline" className="hidden sm:flex" asChild>
+                  <Link to="/auth">
+                    <User className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Link>
+                </Button>
+                <Button variant="hero" className="hidden sm:flex" asChild>
+                  <Link to="/auth">Get Started</Link>
+                </Button>
+              </>
+            )}
 
             {/* Mobile Menu Button */}
             <Button 
@@ -92,12 +132,31 @@ const Header = () => {
                 </a>
               ))}
               <div className="flex gap-2 pt-4 border-t border-border">
-                <Button variant="outline" className="flex-1">
-                  Sign In
-                </Button>
-                <Button variant="hero" className="flex-1">
-                  Get Started
-                </Button>
+                {user ? (
+                  <div className="space-y-2 w-full">
+                    <div className="px-3 py-2 text-sm">
+                      <p className="font-medium">{user.email}</p>
+                      <p className="text-xs text-muted-foreground">Signed in</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={signOut}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log out
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link to="/auth">Sign In</Link>
+                    </Button>
+                    <Button variant="hero" className="flex-1" asChild>
+                      <Link to="/auth">Get Started</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
